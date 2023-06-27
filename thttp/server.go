@@ -8,7 +8,7 @@ import (
 
 type SpawnFn func(task func(ctx context.Context) error)
 
-func Run(ctx context.Context, start func(spawn SpawnFn) error) error {
+func Run(ctx context.Context, start func(spawn func(task func(ctx context.Context) error)) error) error {
 	return nil
 }
 
@@ -20,7 +20,7 @@ func NewServer(listener net.Listener, handler http.Handler) *Server {
 }
 
 func (s *Server) Run(ctx context.Context) error {
-	return Run(ctx, func(spawn SpawnFn) error {
+	return Run(ctx, func(spawn func(task func(ctx context.Context) error)) error {
 		_ = http.Server{
 			ConnContext: s.connContext,
 		}
