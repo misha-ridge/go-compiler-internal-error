@@ -37,7 +37,7 @@ type Server struct {
 }
 
 func NewServer(listener net.Listener, handler http.Handler) *Server {
-	return &Server{}
+	return nil
 }
 
 func (s *Server) Run(ctx context.Context) error {
