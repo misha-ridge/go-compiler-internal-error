@@ -12,12 +12,6 @@ type Server struct {
 }
 
 type Group struct {
-	// group controls lifetimes of its members via this context.
-	// Group is decoupled from the call stack, so it has to carry
-	// context in the struct, not in a parameter
-	ctx    context.Context //nolint:containedctx
-	cancel context.CancelFunc
-
 	done chan struct{}
 }
 
@@ -28,7 +22,7 @@ func NewGroup(ctx context.Context) *Group {
 	return g
 }
 func (g *Group) Spawn(task Task) {
-	go g.runTask(g.ctx, 0, "", task)
+	go g.runTask(nil, 0, "", task)
 }
 
 // ErrPanic is the error type that occurs when a subtask panics
