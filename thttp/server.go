@@ -29,9 +29,7 @@ type Group struct {
 // NewGroup creates a new Group controlled by the given context
 func NewGroup(ctx context.Context) *Group {
 	g := new(Group)
-	g.ctx, g.cancel = context.WithCancel(ctx)
 	g.done = make(chan struct{})
-	close(g.done)
 	return g
 }
 
