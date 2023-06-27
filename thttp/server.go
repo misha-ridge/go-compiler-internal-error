@@ -7,7 +7,6 @@ import (
 )
 
 type Group struct {
-	done chan struct{}
 }
 
 func NewGroup(ctx context.Context) *Group {
