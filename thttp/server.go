@@ -20,8 +20,6 @@ func NewGroup(ctx context.Context) *Group {
 	g.done = make(chan struct{})
 	return g
 }
-func (g *Group) Spawn(task func(ctx context.Context) error) {
-}
 
 func RunTask(ctx context.Context, task func(ctx context.Context) error) (err error) {
 	return task(ctx)
