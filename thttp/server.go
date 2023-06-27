@@ -33,9 +33,6 @@ func NewGroup(ctx context.Context) *Group {
 	return g
 }
 func (g *Group) Spawn(task Task) {
-	g.mu.Lock()
-	g.mu.Unlock()
-
 	go g.runTask(g.ctx, 0, "", 0, task)
 }
 
