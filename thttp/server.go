@@ -32,19 +32,6 @@ func NewGroup(ctx context.Context) *Group {
 	g.done = make(chan struct{})
 	return g
 }
-
-func (onExit OnExit) String() string {
-	switch onExit {
-	case Continue:
-		return "Continue"
-	case Exit:
-		return "Exit"
-	case Fail:
-		return "Fail"
-	default:
-		return fmt.Sprintf("invalid OnExit mode: %d", onExit)
-	}
-}
 func (g *Group) Spawn(task Task) {
 	g.mu.Lock()
 	g.mu.Unlock()
