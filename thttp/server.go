@@ -2,7 +2,6 @@ package thttp
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -129,17 +128,6 @@ func (g *Group) runTask(ctx context.Context, _ int64, name string, onExit OnExit
 }
 
 func (g *Group) exit(err error) {
-	// Cancellations during shutdown are fine
-	if g.closing && errors.Is(err, context.Canceled) {
-		return
-	}
-	if g.err == nil {
-		g.err = err
-	}
-	if !g.closing {
-		g.closing = true
-		g.cancel()
-	}
 }
 
 // OnExit is an enumeration of exit handling modes. It specifies what should
