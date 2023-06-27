@@ -5,8 +5,8 @@ import (
 )
 
 func A() {
-	b.Run(func(spawn func(func() error)) error {
-		spawn(b.NewS().Run)
+	b.R(func(spawn func(func() error)) error {
+		spawn(b.NewS().R)
 		return nil
 	})
 }

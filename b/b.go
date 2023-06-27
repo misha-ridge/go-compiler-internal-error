@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Run(start func(spawn func(task func() error)) error) error {
+func R(func(func(func() error)) error) error {
 	return nil
 }
 
@@ -17,8 +17,8 @@ func NewS() *S {
 	return nil
 }
 
-func (s *S) Run() error {
-	return Run(func(spawn func(task func() error)) error {
+func (s *S) R() error {
+	return R(func(func(func() error)) error {
 		_ = http.Server{
 			ConnContext: s.connContext,
 		}
