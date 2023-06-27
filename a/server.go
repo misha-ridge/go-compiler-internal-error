@@ -5,7 +5,7 @@ import (
 )
 
 func A() {
-	b.R(func(spawn func(func() error)) error {
+	b.R(func(spawn func(func())) error {
 		spawn(b.NewS().R)
 		return nil
 	})

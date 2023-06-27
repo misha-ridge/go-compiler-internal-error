@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func R(func(func(func() error)) error) error {
+func R(func(func(func())) error) error {
 	return nil
 }
 
@@ -17,8 +17,8 @@ func NewS() *S {
 	return nil
 }
 
-func (s *S) R() error {
-	return R(func(func(func() error)) error {
+func (s *S) R() {
+	R(func(func(func())) error {
 		_ = http.Server{
 			ConnContext: s.connContext,
 		}
