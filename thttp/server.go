@@ -20,27 +20,22 @@ func NewGroup(ctx context.Context) *Group {
 	g.done = make(chan struct{})
 	return g
 }
-func (g *Group) Spawn(task Task) {
+func (g *Group) Spawn(task func(ctx context.Context) error) {
 	go g.runTask(task)
 }
 
-// RunTask executes the task in the current goroutine, recovering from panics.
-// A panic is logged, reported to monitoring and returned as ErrPanic.
-func RunTask(ctx context.Context, task Task) (err error) {
+func RunTask(ctx context.Context, task func(ctx context.Context) error) (err error) {
 	return task(ctx)
 }
 
-// Second parameter is the task ID. It is ignored because the only reason to
-// pass it is to add it to the stack trace
-func (g *Group) runTask(task Task) {
+func (g *Group) runTask(task func(ctx context.Context) error) {
 	_ = RunTask(nil, task)
 }
 
 func (g *Group) exit(err error) {
 }
 
-type SpawnFn func(task Task)
-type Task func(ctx context.Context) error
+type SpawnFn func(task func(ctx context.Context) error)
 
 // NewServer creates a Server
 func NewServer(listener net.Listener, handler http.Handler) *Server {
@@ -53,8 +48,6 @@ func Run(ctx context.Context, start func(spawn SpawnFn) error) error {
 	return nil
 }
 
-// Run serves requests until the context is closed, then performs graceful
-// shutdown for up to gracefulShutdownTimeout
 func (s *Server) Run(ctx context.Context) error {
 	return Run(ctx, func(spawn SpawnFn) error {
 		_ = http.Server{
