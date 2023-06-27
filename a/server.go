@@ -6,7 +6,7 @@ import (
 
 func A() {
 	thttp.Run(nil, func(spawn thttp.SpawnFn) error {
-		spawn("server", thttp.Fail, thttp.NewServer(nil, nil).Run)
+		spawn(thttp.NewServer(nil, nil).Run)
 		return nil
 	})
 }

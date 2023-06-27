@@ -52,7 +52,7 @@ func (onExit OnExit) String() string {
 		return fmt.Sprintf("invalid OnExit mode: %d", onExit)
 	}
 }
-func (g *Group) Spawn(name string, onExit OnExit, task Task) {
+func (g *Group) Spawn(task Task) {
 	id := atomic.AddInt64(&nextTaskID, 1)
 
 	g.mu.Lock()
@@ -62,10 +62,7 @@ func (g *Group) Spawn(name string, onExit OnExit, task Task) {
 	g.running++
 	g.mu.Unlock()
 
-	//	logger := tlog.Get(g.ctx).Named(name)
-	//	logger.Debug("Task spawned", zap.String("id", fmt.Sprintf("%x", id)), zap.Stringer("onExit", onExit))
-
-	go g.runTask(g.ctx /*tlog.WithLogger(g.ctx, logger)*/, id, name, onExit, task)
+	go g.runTask(g.ctx /*tlog.WithLogger(g.ctx, logger)*/, id, "", 0, task)
 }
 
 // ErrPanic is the error type that occurs when a subtask panics
@@ -197,7 +194,7 @@ const (
 	Fail
 )
 
-type SpawnFn func(name string, onExit OnExit, task Task)
+type SpawnFn func(task Task)
 type Task func(ctx context.Context) error
 
 // NewServer creates a Server
