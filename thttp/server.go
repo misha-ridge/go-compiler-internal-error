@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/misha-ridge/x/tlog"
-	"go.uber.org/zap"
+	//	"github.com/misha-ridge/x/tlog"
+	//	"go.uber.org/zap"
 	"net"
 	"net/http"
 	"runtime/debug"
@@ -64,10 +64,10 @@ func (g *Group) Spawn(name string, onExit OnExit, task Task) {
 	g.running++
 	g.mu.Unlock()
 
-	logger := tlog.Get(g.ctx).Named(name)
-	logger.Debug("Task spawned", zap.String("id", fmt.Sprintf("%x", id)), zap.Stringer("onExit", onExit))
+	//	logger := tlog.Get(g.ctx).Named(name)
+	//	logger.Debug("Task spawned", zap.String("id", fmt.Sprintf("%x", id)), zap.Stringer("onExit", onExit))
 
-	go g.runTask(tlog.WithLogger(g.ctx, logger), id, name, onExit, task)
+	go g.runTask(g.ctx /*tlog.WithLogger(g.ctx, logger)*/, id, name, onExit, task)
 }
 
 // ErrPanic is the error type that occurs when a subtask panics
@@ -106,7 +106,7 @@ func RunTask(ctx context.Context, task Task) (err error) {
 		if p := recover(); p != nil {
 			panicErr := ErrPanic{value: p, stack: debug.Stack()}
 			err = panicErr
-			tlog.Get(ctx).Error("Panic", zap.String("value", fmt.Sprint(p)), zap.ByteString("stack", panicErr.stack))
+			//			tlog.Get(ctx).Error("Panic", zap.String("value", fmt.Sprint(p)), zap.ByteString("stack", panicErr.stack))
 			if panicCounter := ctx.Value(PanicCounterKey); panicCounter != nil {
 				panicCounter.(func())()
 			}
@@ -123,7 +123,7 @@ const PanicCounterKey contextKey = iota
 // pass it is to add it to the stack trace
 func (g *Group) runTask(ctx context.Context, _ int64, name string, onExit OnExit, task Task) {
 	err := RunTask(ctx, task)
-	tlog.Get(ctx).Debug("Task finished", zap.Error(err))
+	//	tlog.Get(ctx).Debug("Task finished", zap.Error(err))
 
 	g.mu.Lock()
 	defer g.mu.Unlock()
