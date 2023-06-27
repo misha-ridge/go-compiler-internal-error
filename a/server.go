@@ -1,12 +1,12 @@
 package a
 
 import (
-	"github.com/misha-ridge/x/thttp"
+	"github.com/misha-ridge/x/b"
 )
 
 func A() {
-	thttp.Run(func(spawn func(func() error)) error {
-		spawn(thttp.NewServer().Run)
+	b.Run(func(spawn func(func() error)) error {
+		spawn(b.NewS().Run)
 		return nil
 	})
 }

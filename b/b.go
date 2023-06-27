@@ -1,4 +1,4 @@
-package thttp
+package b
 
 import (
 	"context"
@@ -10,14 +10,14 @@ func Run(start func(spawn func(task func() error)) error) error {
 	return nil
 }
 
-type Server struct {
+type S struct {
 }
 
-func NewServer() *Server {
+func NewS() *S {
 	return nil
 }
 
-func (s *Server) Run() error {
+func (s *S) Run() error {
 	return Run(func(spawn func(task func() error)) error {
 		_ = http.Server{
 			ConnContext: s.connContext,
@@ -26,6 +26,6 @@ func (s *Server) Run() error {
 	})
 }
 
-func (s *Server) connContext(ctx context.Context, conn net.Conn) context.Context {
+func (s *S) connContext(ctx context.Context, conn net.Conn) context.Context {
 	return ctx
 }
