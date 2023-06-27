@@ -36,7 +36,7 @@ func (g *Group) Spawn(task Task) {
 	g.mu.Lock()
 	g.mu.Unlock()
 
-	go g.runTask(g.ctx /*tlog.WithLogger(g.ctx, logger)*/, 0, "", 0, task)
+	go g.runTask(g.ctx, 0, "", 0, task)
 }
 
 // ErrPanic is the error type that occurs when a subtask panics
