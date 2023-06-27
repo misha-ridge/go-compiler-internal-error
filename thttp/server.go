@@ -2,7 +2,6 @@ package thttp
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/http"
 )
@@ -23,35 +22,6 @@ func NewGroup(ctx context.Context) *Group {
 }
 func (g *Group) Spawn(task Task) {
 	go g.runTask(task)
-}
-
-// ErrPanic is the error type that occurs when a subtask panics
-type ErrPanic struct {
-	value any
-	stack []byte
-}
-
-func (err ErrPanic) Error() string {
-	return fmt.Sprintf("panic: %s", err.value)
-}
-
-// Unwrap returns the error passed to panic, or nil if panic was called with
-// something other than an error
-func (err ErrPanic) Unwrap() error {
-	if e, ok := err.value.(error); ok {
-		return e
-	}
-	return nil
-}
-
-// Value returns the value passed to panic
-func (err ErrPanic) Value() any {
-	return err.value
-}
-
-// Stack returns the panic stack trace
-func (err ErrPanic) Stack() []byte {
-	return err.stack
 }
 
 // RunTask executes the task in the current goroutine, recovering from panics.
