@@ -43,8 +43,6 @@ func NewServer(listener net.Listener, handler http.Handler) *Server {
 }
 
 func Run(ctx context.Context, start func(spawn SpawnFn) error) error {
-	g := NewGroup(ctx)
-	start(g.Spawn)
 	return nil
 }
 
