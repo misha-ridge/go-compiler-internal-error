@@ -29,7 +29,7 @@ func NewGroup(ctx context.Context) *Group {
 	return g
 }
 func (g *Group) Spawn(task Task) {
-	go g.runTask(g.ctx, 0, "", 0, task)
+	go g.runTask(g.ctx, 0, "", task)
 }
 
 // ErrPanic is the error type that occurs when a subtask panics
@@ -83,7 +83,7 @@ const PanicCounterKey contextKey = iota
 
 // Second parameter is the task ID. It is ignored because the only reason to
 // pass it is to add it to the stack trace
-func (g *Group) runTask(ctx context.Context, _ int64, name string, onExit OnExit, task Task) {
+func (g *Group) runTask(ctx context.Context, _ int64, name string, task Task) {
 	err := RunTask(ctx, task)
 	//	tlog.Get(ctx).Debug("Task finished", zap.Error(err))
 
@@ -94,43 +94,6 @@ func (g *Group) runTask(ctx context.Context, _ int64, name string, onExit OnExit
 
 func (g *Group) exit(err error) {
 }
-
-// OnExit is an enumeration of exit handling modes. It specifies what should
-// happen to the parent task if the subtask returns nil.
-//
-// Regardless of the chosen mode, if the subtask returns an error, it causes the
-// parent task to shut down gracefully and return that error.
-type OnExit int
-
-const (
-	// Continue means other subtasks of the parent task should continue to run.
-	// Note that the parent task will return nil if its last remaining subtask
-	// returns nil, even if Continue is specified.
-	//
-	// Use this mode for finite jobs that need to run once.
-	Continue OnExit = iota
-
-	// Exit means shut down the parent task gracefully.
-	//
-	// Use this mode for tasks that should be able to initiate graceful
-	// shutdown, such as an HTTP server with a /quit endpoint that needs to
-	// cause the process to exit.
-	//
-	// If any of other subtasks return an error, and it is not a (possibly
-	// wrapped) context.Canceled, then the parent task will return the error.
-	// Only first error from subtasks will be returned, the rest will be
-	// discarded.
-	//
-	// If all other subtasks return nil or context.Canceled, the parent task
-	// returns nil.
-	Exit
-
-	// Fail means shut down the parent task gracefully and return an error.
-	//
-	// Use this mode for subtasks that should never return unless their context
-	// is closed.
-	Fail
-)
 
 type SpawnFn func(task Task)
 type Task func(ctx context.Context) error
