@@ -21,7 +21,6 @@ func NewGroup(ctx context.Context) *Group {
 	return g
 }
 func (g *Group) Spawn(task func(ctx context.Context) error) {
-	go g.runTask(task)
 }
 
 func RunTask(ctx context.Context, task func(ctx context.Context) error) (err error) {
@@ -37,13 +36,12 @@ func (g *Group) exit(err error) {
 
 type SpawnFn func(task func(ctx context.Context) error)
 
-// NewServer creates a Server
-func NewServer(listener net.Listener, handler http.Handler) *Server {
-	return &Server{}
-}
-
 func Run(ctx context.Context, start func(spawn SpawnFn) error) error {
 	return nil
+}
+
+func NewServer(listener net.Listener, handler http.Handler) *Server {
+	return &Server{}
 }
 
 func (s *Server) Run(ctx context.Context) error {
