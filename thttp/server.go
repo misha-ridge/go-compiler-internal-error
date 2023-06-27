@@ -11,8 +11,6 @@ import (
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
-
-	"github.com/misha-ridge/x/parallel"
 )
 
 // Server wraps an HTTP server
@@ -44,7 +42,19 @@ func NewGroup(ctx context.Context) *Group {
 
 var nextTaskID int64 = 0x0bace1d000000000
 
-func (g *Group) Spawn(name string, onExit parallel.OnExit, task parallel.Task) {
+func (onExit OnExit) String() string {
+	switch onExit {
+	case Continue:
+		return "Continue"
+	case Exit:
+		return "Exit"
+	case Fail:
+		return "Fail"
+	default:
+		return fmt.Sprintf("invalid OnExit mode: %d", onExit)
+	}
+}
+func (g *Group) Spawn(name string, onExit OnExit, task Task) {
 	id := atomic.AddInt64(&nextTaskID, 1)
 
 	g.mu.Lock()
@@ -91,7 +101,7 @@ func (err ErrPanic) Stack() []byte {
 
 // RunTask executes the task in the current goroutine, recovering from panics.
 // A panic is logged, reported to monitoring and returned as ErrPanic.
-func RunTask(ctx context.Context, task parallel.Task) (err error) {
+func RunTask(ctx context.Context, task Task) (err error) {
 	defer func() {
 		if p := recover(); p != nil {
 			panicErr := ErrPanic{value: p, stack: debug.Stack()}
@@ -111,7 +121,7 @@ const PanicCounterKey contextKey = iota
 
 // Second parameter is the task ID. It is ignored because the only reason to
 // pass it is to add it to the stack trace
-func (g *Group) runTask(ctx context.Context, _ int64, name string, onExit parallel.OnExit, task parallel.Task) {
+func (g *Group) runTask(ctx context.Context, _ int64, name string, onExit OnExit, task Task) {
 	err := RunTask(ctx, task)
 	tlog.Get(ctx).Debug("Task finished", zap.Error(err))
 
@@ -122,10 +132,10 @@ func (g *Group) runTask(ctx context.Context, _ int64, name string, onExit parall
 		g.exit(err)
 	} else if !g.closing {
 		switch onExit {
-		case parallel.Continue:
-		case parallel.Exit:
+		case Continue:
+		case Exit:
 			g.exit(nil)
-		case parallel.Fail:
+		case Fail:
 			g.exit(fmt.Errorf("task %q terminated unexpectedly", name))
 		default:
 			g.exit(fmt.Errorf("task %q: %v", name, onExit))
@@ -152,7 +162,45 @@ func (g *Group) exit(err error) {
 	}
 }
 
-type SpawnFn func(name string, onExit parallel.OnExit, task parallel.Task)
+// OnExit is an enumeration of exit handling modes. It specifies what should
+// happen to the parent task if the subtask returns nil.
+//
+// Regardless of the chosen mode, if the subtask returns an error, it causes the
+// parent task to shut down gracefully and return that error.
+type OnExit int
+
+const (
+	// Continue means other subtasks of the parent task should continue to run.
+	// Note that the parent task will return nil if its last remaining subtask
+	// returns nil, even if Continue is specified.
+	//
+	// Use this mode for finite jobs that need to run once.
+	Continue OnExit = iota
+
+	// Exit means shut down the parent task gracefully.
+	//
+	// Use this mode for tasks that should be able to initiate graceful
+	// shutdown, such as an HTTP server with a /quit endpoint that needs to
+	// cause the process to exit.
+	//
+	// If any of other subtasks return an error, and it is not a (possibly
+	// wrapped) context.Canceled, then the parent task will return the error.
+	// Only first error from subtasks will be returned, the rest will be
+	// discarded.
+	//
+	// If all other subtasks return nil or context.Canceled, the parent task
+	// returns nil.
+	Exit
+
+	// Fail means shut down the parent task gracefully and return an error.
+	//
+	// Use this mode for subtasks that should never return unless their context
+	// is closed.
+	Fail
+)
+
+type SpawnFn func(name string, onExit OnExit, task Task)
+type Task func(ctx context.Context) error
 
 // NewServer creates a Server
 func NewServer(listener net.Listener, handler http.Handler) *Server {
