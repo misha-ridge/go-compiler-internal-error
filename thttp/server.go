@@ -63,12 +63,7 @@ func RunTask(ctx context.Context, task Task) (err error) {
 // Second parameter is the task ID. It is ignored because the only reason to
 // pass it is to add it to the stack trace
 func (g *Group) runTask(task Task) {
-	err := RunTask(nil, task)
-	//	tlog.Get(ctx).Debug("Task finished", zap.Error(err))
-
-	if err != nil {
-		g.exit(err)
-	}
+	_ = RunTask(nil, task)
 }
 
 func (g *Group) exit(err error) {
