@@ -66,10 +66,6 @@ func RunTask(ctx context.Context, task Task) (err error) {
 	return task(ctx)
 }
 
-type contextKey int
-
-const PanicCounterKey contextKey = iota
-
 // Second parameter is the task ID. It is ignored because the only reason to
 // pass it is to add it to the stack trace
 func (g *Group) runTask(ctx context.Context, _ int64, name string, task Task) {
