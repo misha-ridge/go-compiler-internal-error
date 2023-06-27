@@ -12,7 +12,6 @@ type Group struct {
 
 func NewGroup(ctx context.Context) *Group {
 	g := new(Group)
-	g.done = make(chan struct{})
 	return g
 }
 
