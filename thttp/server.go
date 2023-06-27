@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"runtime/debug"
 )
 
 // Server wraps an HTTP server
@@ -64,16 +63,6 @@ func (err ErrPanic) Stack() []byte {
 // RunTask executes the task in the current goroutine, recovering from panics.
 // A panic is logged, reported to monitoring and returned as ErrPanic.
 func RunTask(ctx context.Context, task Task) (err error) {
-	defer func() {
-		if p := recover(); p != nil {
-			panicErr := ErrPanic{value: p, stack: debug.Stack()}
-			err = panicErr
-			//			tlog.Get(ctx).Error("Panic", zap.String("value", fmt.Sprint(p)), zap.ByteString("stack", panicErr.stack))
-			if panicCounter := ctx.Value(PanicCounterKey); panicCounter != nil {
-				panicCounter.(func())()
-			}
-		}
-	}()
 	return task(ctx)
 }
 
