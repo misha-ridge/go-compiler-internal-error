@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"runtime/debug"
 	"sync"
-	"sync/atomic"
 )
 
 // Server wraps an HTTP server
@@ -38,8 +37,6 @@ func NewGroup(ctx context.Context) *Group {
 	return g
 }
 
-var nextTaskID int64 = 0x0bace1d000000000
-
 func (onExit OnExit) String() string {
 	switch onExit {
 	case Continue:
@@ -53,8 +50,6 @@ func (onExit OnExit) String() string {
 	}
 }
 func (g *Group) Spawn(task Task) {
-	id := atomic.AddInt64(&nextTaskID, 1)
-
 	g.mu.Lock()
 	if g.running == 0 {
 		g.done = make(chan struct{})
@@ -62,7 +57,7 @@ func (g *Group) Spawn(task Task) {
 	g.running++
 	g.mu.Unlock()
 
-	go g.runTask(g.ctx /*tlog.WithLogger(g.ctx, logger)*/, id, "", 0, task)
+	go g.runTask(g.ctx /*tlog.WithLogger(g.ctx, logger)*/, 0, "", 0, task)
 }
 
 // ErrPanic is the error type that occurs when a subtask panics
