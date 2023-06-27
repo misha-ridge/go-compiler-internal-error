@@ -6,15 +6,10 @@ import (
 	"net/http"
 )
 
-// Server wraps an HTTP server
-type Server struct {
-}
-
 type Group struct {
 	done chan struct{}
 }
 
-// NewGroup creates a new Group controlled by the given context
 func NewGroup(ctx context.Context) *Group {
 	g := new(Group)
 	g.done = make(chan struct{})
@@ -36,6 +31,9 @@ type SpawnFn func(task func(ctx context.Context) error)
 
 func Run(ctx context.Context, start func(spawn SpawnFn) error) error {
 	return nil
+}
+
+type Server struct {
 }
 
 func NewServer(listener net.Listener, handler http.Handler) *Server {
