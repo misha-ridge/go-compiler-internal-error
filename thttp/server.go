@@ -205,16 +205,16 @@ func NewServer(listener net.Listener, handler http.Handler) *Server {
 	return &Server{}
 }
 
-func Run(ctx context.Context, start func(ctx context.Context, spawn SpawnFn) error) error {
+func Run(ctx context.Context, start func(spawn SpawnFn) error) error {
 	g := NewGroup(ctx)
-	start(nil, g.Spawn)
+	start(g.Spawn)
 	return nil
 }
 
 // Run serves requests until the context is closed, then performs graceful
 // shutdown for up to gracefulShutdownTimeout
 func (s *Server) Run(ctx context.Context) error {
-	return Run(ctx, func(ctx context.Context, spawn SpawnFn) error {
+	return Run(ctx, func(spawn SpawnFn) error {
 		_ = http.Server{
 			ConnContext: s.connContext,
 		}
