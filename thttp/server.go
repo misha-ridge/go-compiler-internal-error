@@ -22,7 +22,6 @@ type Group struct {
 	cancel context.CancelFunc
 
 	mu      sync.Mutex
-	running int
 	done    chan struct{}
 	closing bool
 	err     error
@@ -51,10 +50,6 @@ func (onExit OnExit) String() string {
 }
 func (g *Group) Spawn(task Task) {
 	g.mu.Lock()
-	if g.running == 0 {
-		g.done = make(chan struct{})
-	}
-	g.running++
 	g.mu.Unlock()
 
 	go g.runTask(g.ctx /*tlog.WithLogger(g.ctx, logger)*/, 0, "", 0, task)
@@ -130,11 +125,6 @@ func (g *Group) runTask(ctx context.Context, _ int64, name string, onExit OnExit
 		default:
 			g.exit(fmt.Errorf("task %q: %v", name, onExit))
 		}
-	}
-
-	g.running--
-	if g.running == 0 {
-		close(g.done)
 	}
 }
 
