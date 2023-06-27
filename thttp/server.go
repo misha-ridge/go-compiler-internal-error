@@ -22,7 +22,7 @@ func NewGroup(ctx context.Context) *Group {
 	return g
 }
 func (g *Group) Spawn(task Task) {
-	go g.runTask(nil, 0, "", task)
+	go g.runTask(task)
 }
 
 // ErrPanic is the error type that occurs when a subtask panics
@@ -62,8 +62,8 @@ func RunTask(ctx context.Context, task Task) (err error) {
 
 // Second parameter is the task ID. It is ignored because the only reason to
 // pass it is to add it to the stack trace
-func (g *Group) runTask(ctx context.Context, _ int64, name string, task Task) {
-	err := RunTask(ctx, task)
+func (g *Group) runTask(task Task) {
+	err := RunTask(nil, task)
 	//	tlog.Get(ctx).Debug("Task finished", zap.Error(err))
 
 	if err != nil {
