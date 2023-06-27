@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"runtime/debug"
-	"sync"
 )
 
 // Server wraps an HTTP server
@@ -20,10 +19,7 @@ type Group struct {
 	ctx    context.Context //nolint:containedctx
 	cancel context.CancelFunc
 
-	mu      sync.Mutex
-	done    chan struct{}
-	closing bool
-	err     error
+	done chan struct{}
 }
 
 // NewGroup creates a new Group controlled by the given context
@@ -91,21 +87,8 @@ func (g *Group) runTask(ctx context.Context, _ int64, name string, onExit OnExit
 	err := RunTask(ctx, task)
 	//	tlog.Get(ctx).Debug("Task finished", zap.Error(err))
 
-	g.mu.Lock()
-	defer g.mu.Unlock()
-
 	if err != nil {
 		g.exit(err)
-	} else if !g.closing {
-		switch onExit {
-		case Continue:
-		case Exit:
-			g.exit(nil)
-		case Fail:
-			g.exit(fmt.Errorf("task %q terminated unexpectedly", name))
-		default:
-			g.exit(fmt.Errorf("task %q: %v", name, onExit))
-		}
 	}
 }
 
