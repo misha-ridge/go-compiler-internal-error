@@ -6,25 +6,6 @@ import (
 	"net/http"
 )
 
-type Group struct {
-}
-
-func NewGroup(ctx context.Context) *Group {
-	g := new(Group)
-	return g
-}
-
-func RunTask(ctx context.Context, task func(ctx context.Context) error) (err error) {
-	return task(ctx)
-}
-
-func (g *Group) runTask(task func(ctx context.Context) error) {
-	_ = RunTask(nil, task)
-}
-
-func (g *Group) exit(err error) {
-}
-
 type SpawnFn func(task func(ctx context.Context) error)
 
 func Run(ctx context.Context, start func(spawn SpawnFn) error) error {
