@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net"
 	"net/http"
-	"sync"
 
 	"github.com/misha-ridge/x/parallel"
 	"github.com/misha-ridge/x/tcontext"
@@ -21,7 +20,6 @@ const gracefulShutdownTimeout = 5 * time.Second
 type Server struct {
 	listener net.Listener
 	handler  http.Handler
-	locked   sync.WaitGroup
 }
 
 // NewServer creates a Server
@@ -53,7 +51,6 @@ func (s *Server) Run(ctx context.Context) error {
 			BaseContext: func(net.Listener) context.Context { return reqCtx },
 			ConnContext: s.connContext,
 		}
-		server.Handler = s.lock(server.Handler) // install as outermost
 
 		spawn("serve", parallel.Fail, func(ctx context.Context) error {
 			logger.Info("Serving requests")
@@ -102,7 +99,6 @@ func (s *Server) Run(ctx context.Context) error {
 			}
 
 			reqCancel() // ask hijacked connections to terminate
-			s.locked.Wait()
 
 			logger.Info("Shutdown complete")
 			return ctx.Err()
@@ -119,16 +115,4 @@ func (s *Server) ListenAddr() net.Addr {
 
 func (s *Server) connContext(ctx context.Context, conn net.Conn) context.Context {
 	return tlog.With(ctx, zap.Stringer("remoteAddr", conn.RemoteAddr()))
-}
-
-// This mandatory Middleware ensures that any running handlers prevent the
-// server from shutting down. This is normally taken care of by the standard
-// library itself, except when connections are hijacked. The latter use case is
-// important for WebSocket.
-func (s *Server) lock(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s.locked.Add(1)
-		defer s.locked.Done()
-		next.ServeHTTP(w, r)
-	})
 }
