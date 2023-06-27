@@ -6,8 +6,6 @@ import (
 	"net/http"
 )
 
-type SpawnFn func(task func(ctx context.Context) error)
-
 func Run(ctx context.Context, start func(spawn func(task func(ctx context.Context) error)) error) error {
 	return nil
 }
@@ -15,7 +13,7 @@ func Run(ctx context.Context, start func(spawn func(task func(ctx context.Contex
 type Server struct {
 }
 
-func NewServer(listener net.Listener, handler http.Handler) *Server {
+func NewServer() *Server {
 	return nil
 }
 
